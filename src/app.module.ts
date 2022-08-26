@@ -1,8 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { MiddlewareConsumer, Module, NestModule, Scope } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthGuard } from './guards/auth.guard';
+import { LogggingInterceptor } from './interceptors/logging.interceptor';
 import { AuthMiddleware } from './middlewares/auth.middleware';
 import { RequestService } from './request.service';
 
@@ -12,11 +13,16 @@ import { RequestService } from './request.service';
   providers: [
     AppService,
     RequestService,
-    // {
-    //   // Guards can also go here in order to be globally scoped, but allowing DI from providers of this module
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      // Guards can also go here in order to be globally scoped, but allowing DI from providers of this module
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LogggingInterceptor,
+      scope: Scope.REQUEST,
+    },
   ],
 })
 export class AppModule implements NestModule {
